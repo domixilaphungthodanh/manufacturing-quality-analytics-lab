@@ -1,0 +1,14 @@
+PRAGMA foreign_keys=ON;
+CREATE TABLE product_groups(group_id INTEGER PRIMARY KEY,name TEXT NOT NULL UNIQUE);
+CREATE TABLE products(product_id INTEGER PRIMARY KEY,group_id INTEGER NOT NULL REFERENCES product_groups,name TEXT NOT NULL UNIQUE);
+CREATE TABLE shifts(shift_id INTEGER PRIMARY KEY,name TEXT NOT NULL UNIQUE);
+CREATE TABLE batches(batch_id INTEGER PRIMARY KEY,batch_code TEXT NOT NULL UNIQUE,product_id INTEGER NOT NULL REFERENCES products,shift_id INTEGER NOT NULL REFERENCES shifts,produced_at TEXT NOT NULL);
+CREATE TABLE units(unit_id INTEGER PRIMARY KEY,unit_code TEXT NOT NULL UNIQUE,batch_id INTEGER NOT NULL REFERENCES batches);
+CREATE TABLE defect_types(defect_type_id INTEGER PRIMARY KEY,name TEXT NOT NULL UNIQUE);
+CREATE TABLE inspections(inspection_id INTEGER PRIMARY KEY,unit_id INTEGER NOT NULL REFERENCES units,inspection_no INTEGER NOT NULL CHECK(inspection_no IN(1,2)),inspected_at TEXT NOT NULL,UNIQUE(unit_id,inspection_no));
+CREATE TABLE inspection_defects(inspection_id INTEGER NOT NULL REFERENCES inspections,defect_type_id INTEGER NOT NULL REFERENCES defect_types,PRIMARY KEY(inspection_id,defect_type_id));
+CREATE TABLE reworks(rework_id INTEGER PRIMARY KEY,unit_id INTEGER NOT NULL UNIQUE REFERENCES units,completed_at TEXT NOT NULL);
+CREATE TABLE metadata(key TEXT PRIMARY KEY,value TEXT NOT NULL);
+CREATE INDEX inspections_time ON inspections(inspected_at);
+CREATE INDEX units_batch ON units(batch_id);
+CREATE INDEX batches_date ON batches(produced_at);
